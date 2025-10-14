@@ -1,7 +1,6 @@
 import os
 import time
-import string
-import random
+
 
 # режим отладки
 DEBUG = False
@@ -9,6 +8,8 @@ DEBUG = False
 TITLE_WIDTH = 100
 # делает заставки максимальной ширины
 TITLE_WIDTH = os.get_terminal_size().columns-2
+#высота окна терминала
+WINDOW_HEIGHT = os.get_terminal_size().lines
 
 
 
@@ -49,7 +50,7 @@ def print_title(title):
 
 
 
-# когда-нибудь сделаю разброс личных параметров
+
 class Doctor:
     def __init__(self):
         self.inventory = []
@@ -81,7 +82,7 @@ def scene_0():
     input_valid = False
 
     while not input_valid:
-        choice = input(colored('Выберите опцию: ', 94)).strip()
+        choice = input(colored('Выберите опцию: ', '3;94')).strip()
 
         if choice == '1':
             input_valid = True
@@ -92,7 +93,10 @@ def scene_0():
             time.sleep(2)
             break
         else:
-            print_colored('\x1b[1AЧувак, ты ввёл фигню 🤬\n ', 31)
+            print_colored('\x1b[1A❌ Вы вели неверное значение. Попробуйте снова\n ', 31)
+
+
+
 
 # первая сцена
 def scene_1():
@@ -115,7 +119,7 @@ def scene_1():
 
     while not input_valid:
         try:
-            choices = list(input(colored('Введите номера предметов: ', 94)).strip())
+            choices = list(input(colored('Введите номера предметов: ', '3;94')).strip())
             print()
 
             for choice in choices:
@@ -156,11 +160,14 @@ def scene_1():
 
     time.sleep(1)
 
+
+
+
 # сцена 2 с первым пациентом
 def scene_2():
     print_title('Пациент 1. Диагноз: Расстройство аутистического спектра')
     text_animation('Вы заходите в палату 67 и здоровайтесь с пациентом. . .\n', delay=0.08)
-    text_animation('"Алексей, здавствуйте. . ."\n', delay=0.08)
+    text_animation('"Алексей, здравствуйте. . ."\n', delay=0.08)
     time.sleep(1)
 
     trust = 0
@@ -176,12 +183,12 @@ def scene_2():
     input_valid_count = 0 
 
     while input_valid_count < 3:
-        choice = input(colored('Выберите действие: ', 94)).strip()
+        choice = input(colored('Выберите действие: ', '3;94')).strip()
         print()
 
         if choice == '1':
             input_valid_count += 1
-            print('\x1b[2', end='')
+            print('\x1b[2A', end='')
             text_animation('Вы пытаетесь установить зрительный контакт...')
             time.sleep(0.4)
             text_animation('Алексей отводит взгляд.\n', 0.06, 31)
@@ -191,7 +198,7 @@ def scene_2():
         elif choice == '2':
             input_valid_count +=1
 
-            print('\x1b[2', end='') 
+            print('\x1b[2A', end='') 
             text_animation('Что вы хотите показать пациенту?\n')
             for i, item in enumerate(doctor.inventory, 1):
                 print_colored(f'{i}.', '1;33', end='')
@@ -200,7 +207,7 @@ def scene_2():
             input2_valid = False
 
             while not input2_valid:
-                choice2 = input(colored('Выберите предмет: ', 94)).strip()
+                choice2 = input(colored('Выберите предмет: ', '3;94')).strip()
                 print()
 
                 if choice2 == '1' or choice2 == '2' or choice2 == '3':
@@ -209,7 +216,7 @@ def scene_2():
                     item = doctor.inventory[int(choice2)-1]
 
                     if item in ['карандаш', 'шариковая ручка']:
-                        print('\x1b[2A', end='')
+                        print('\x1b[1A', end='')
                         text_animation('Вы протягиваете предмет Алексею...')
                         time.sleep(0.4)
                         text_animation('Алексей с интересом рассматривает предмет.', 0.06, 32)
@@ -217,7 +224,7 @@ def scene_2():
                         print_colored(f'Уровень доверия(повысился): {colored(trust, 93)}\n', 36)
 
                     elif item in ["блокнот для записей", "медицинский молоточек"]:
-                        print('\x1b[2', end='')
+                        print('\x1b[2A', end='')
                         text_animation('Вы протягиваете предмет Алексею...')
                         time.sleep(0.4)
                         print('\x1b[3A', end='')
@@ -231,7 +238,7 @@ def scene_2():
                         print_colored(f'Уровень доверия(не изменился): {colored(trust, 93)}\n', 36)
 
                 else:
-                    print_colored('\x1b[1AЧувак, ты ввёл фигню 🤬\n ', 31)
+                    print_colored('\x1b[1A❌ Вы вели неверное значение. Попробуйте снова\n ', 31)
 
         elif choice == '3':
             input_valid_count += 1
@@ -244,7 +251,7 @@ def scene_2():
             
         else:
             print('\x1b[1A', end='')
-            print_colored('Чувак, ты ввёл фигню 🤬\n ', 31)
+            print_colored('❌ Вы вели неверное значение. Попробуйте снова\n ', 31)
             print()
     if trust >= 3:
         text_animation('⭐️ Алексей установил с вами контакт!\n', 0.06)
@@ -266,11 +273,11 @@ def scene_2():
 def scene_3():
     print_title('Пациент 2. Диагноз: Тревожное расстройство')
     text_animation('Вы заходите в палату 34. . .\n', delay=0.08)
-    text_animation('"Здавствуйте, Михаил,. . ."\n', delay=0.08)
+    text_animation('"Здравствуйте, Михаил,. . ."\n', delay=0.08)
     time.sleep(1)
 
     trust = 5
-    text_animation('Пациент в последние пол месяца идет на поправку. Вы решили сегодня вывести его на прогулку.\n\n', 0.06)
+    text_animation('Пациент в последние полмесяца идет на поправку. Вы решили сегодня вывести его на прогулку.\n\n', 0.06)
     print_colored(f'Уровень доверия: {colored(trust, 93)}\n', 36)
 
     actions = ['Поговорить о прогрессе лечения', 'Показать предмет', 'Обсудить планы на будущее']
@@ -282,13 +289,13 @@ def scene_3():
     input_valid_count = 0 
 
     while input_valid_count < 3:
-        choice = input(colored('Выберите действие: ', 94)).strip()
+        choice = input(colored('Выберите действие: ', '3;94')).strip()
         print()
 
         if choice == '1':
             input_valid_count += 1
-            print('\x1b[2', end='')
-            text_animation('Вы начинаете обсуждать текуй прогресс пациента...')
+            print('\x1b[2A', end='')
+            text_animation('Вы начинаете обсуждать текущий прогресс пациента...')
             time.sleep(0.4)
             text_animation('По Михаилу видно, что ему неприятно это обсуждать.\n', 0.06, 31)
             trust -= 1
@@ -297,7 +304,7 @@ def scene_3():
         elif choice == '2':
             input_valid_count +=1
 
-            print('\x1b[2', end='') 
+            print('\x1b[2A', end='') 
             text_animation('Что вы хотите показать пациенту?\n')
             for i, item in enumerate(doctor.inventory, 1):
                 print_colored(f'{i}.', '1;33', end='')
@@ -306,7 +313,7 @@ def scene_3():
             input2_valid = False
 
             while not input2_valid:
-                choice2 = input(colored('Выберите предмет: ', 94)).strip()
+                choice2 = input(colored('Выберите предмет: ', '3;94')).strip()
                 print()
 
                 if choice2 == '1' or choice2 == '2' or choice2 == '3':
@@ -323,7 +330,7 @@ def scene_3():
                         print_colored(f'Уровень доверия(повысился): {colored(trust, 93)}\n', 36)
 
                     elif item in ["маленький камертон"]:
-                        print('\x1b[2', end='')
+                        print('\x1b[2A', end='')
                         text_animation('Вы протягиваете предмет Алексею...')
                         time.sleep(0.4)
                         print('\x1b[3A', end='')
@@ -337,20 +344,20 @@ def scene_3():
                         print_colored(f'Уровень доверия(не изменился): {colored(trust, 93)}\n', 36)
 
                 else:
-                    print_colored('\x1b[1AЧувак, ты ввёл фигню 🤬\n ', 31)
+                    print_colored('\x1b[1A❌ Вы вели неверное значение. Попробуйте снова\n ', 31)
 
         elif choice == '3':
             input_valid_count += 1
             print('\x1b[2A', end='')
             text_animation('Вы заводите разговор')
             text_animation('................\n', 0.07)
-            text_animation('Михаел радостно рассказывает, что мечтает стать повором.\n', 0.06, 32)
+            text_animation('Михаил радостно рассказывает, что мечтает стать поваром.\n', 0.06, 32)
             trust += 2
             print_colored(f'Уровень доверия(повысился): {colored(trust, 93)}\n', 36)
             
         else:
             print('\x1b[1A', end='')
-            print_colored('Чувак, ты ввёл фигню 🤬\n ', 31)
+            print_colored('❌ Вы вели неверное значение. Попробуйте снова\n ', 31)
             
     if trust >= 3:
         text_animation('⭐️ Алексей установил с вами контакт!\n', 0.06)
@@ -386,12 +393,12 @@ def scene_4():
     input_valid_count = 0 
 
     while input_valid_count < 3:
-        choice = input(colored('Выберите действие: ', 94)).strip()
+        choice = input(colored('Выберите действие: ', '3;94')).strip()
         print()
 
         if choice == '1':
             input_valid_count += 1
-            print('\x1b[2', end='')
+            print('\x1b[2A', end='')
             text_animation('Вы начинаете говорить максимально осмотрительно и осторожно с пациентом....')
             time.sleep(0.4)
             text_animation('Фёдор никак не реагрут.\n', 0.06, 31)
@@ -400,7 +407,7 @@ def scene_4():
         elif choice == '2':
             input_valid_count +=1
 
-            print('\x1b[2', end='') 
+            print('\x1b[2A', end='') 
             text_animation('Что вы хотите показать пациенту?\n')
             for i, item in enumerate(doctor.inventory, 1):
                 print_colored(f'{i}.', '1;33', end='')
@@ -409,7 +416,7 @@ def scene_4():
             input2_valid = False
 
             while not input2_valid:
-                choice2 = input(colored('Выберите предмет: ', 94)).strip()
+                choice2 = input(colored('Выберите предмет: ', '3;94')).strip()
                 print()
 
                 if choice2 == '1' or choice2 == '2' or choice2 == '3':
@@ -421,33 +428,33 @@ def scene_4():
                         print('\x1b[2A', end='')
                         text_animation('Вы протягиваете предмет Фёдору...')
                         time.sleep(0.4)
-                        text_animation('Фёдор кидается на вас и начинает душить.', 0.06, 32)
-                        text_animation('Охраники врываются в палату и разнимают вас', 0.06)
-                        text_animation('В след вы смотрите как пациента уводят в изолятор', 0.06)
+                        text_animation('Фёдор кидается на вас и начинает душить.', 0.06, 31)
+                        text_animation('Охраники врываются в палату и разнимают вас', 0.08)
+                        text_animation('Вслед вы смотрите как пациента уводят в изолятор', 0.08)
                         trust -= 10
                         print_colored(f'Уровень доверия(понизился): {colored(trust, 93)}\n', 31)
                         input_valid_count = 3
                 else:
-                    print_colored('\x1b[1AЧувак, ты ввёл фигню 🤬\n ', 31)
+                    print_colored('\x1b[1A❌ Вы вели неверное значение. Попробуйте снова\n ', 31)
 
         elif choice == '3':
             input_valid_count -= 1
             print('\x1b[2A', end='')
             text_animation('Вы предлагаете выпить лекарство')
             text_animation('................\n', 0.07)
-            text_animation('Фёдор продолжает вас игнорировать, но видно как он раздражен.\n', 0.06, 32)
+            text_animation('Фёдор продолжает вас игнорировать, но видно как он раздражен.\n', 0.06)
             trust -= 1
-            print_colored(f'Уровень доверия(повысился): {colored(trust, 93)}\n', 36)
+            print_colored(f'Уровень доверия(понизился): {colored(trust, 93)}\n', 36)
             
         else:
             print('\x1b[1A', end='')
-            print_colored('Чувак, ты ввёл фигню 🤬\n ', 31)
+            print_colored('❌ Вы вели неверное значение. Попробуйте снова\n ', 31)
         
     if trust >= -6:
-        text_animation('💔 Состояние Фёдора никак не изменилось.\n', 0.06)
+        text_animation('Состояние Фёдора никак не изменилось.\n', 0.06)
         
     else:
-        text_animation('⚖️ Пациэнта увели в изолятор\n', 0.06, 32)
+        text_animation('Пациента увели в изолятор\n', 0.06)
         time.sleep(0.8)
 
     scene_5()
@@ -459,7 +466,7 @@ def scene_5():
     print_title('концовка')
     text_animation('Вот и смена подошла к концу!', 0.07)
     time.sleep(0.6)
-    text_animation('Вы неспеша снимаете с себе белый халат...', 0.09)
+    text_animation('Вы неспеша снимаете с себя белый халат...', 0.09)
     time.sleep(0.8)
     text_animation('. . .', 0.6)
     time.sleep(3)
@@ -470,55 +477,48 @@ def scene_5():
 
     scene_6()
 
-
-
-# всякая фигня для матричного эффекта
-terminal_size = os.get_terminal_size()
-height = terminal_size.lines
-chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*()[]{}<>"
-drops = [0] * TITLE_WIDTH
-streams_length = [random.randint(5, height // 2) for i in range(TITLE_WIDTH)]
-
 # установка курсора (также esc код)
-def cursor_move(x, y):
-    print(f"\033[{y+1};{x}H", end='')
+def cursor_to(x, y):
+    print(f"\x1b[{y+1};{x}H", end='')
 
+messages = [
+    colored("Вы прошли игру! 😎", '1;5;94'),
+    f'', 
+    colored('Над игрой работали:', '4;96'), 
+    f'- Автор Идеи - Лера Колибаба',
+    f'- Ведущий Программист1 - Лера Колибаба',
+    f'- Ведущий Программист2 - Паша Подъяблонский',
+    f'- Главный Тестировщик - Паша Подъяблонский',
+    f'- Главный Дизайнер - Лера Колибаба',
+    f'',
+    colored('🌹🌹 Спасибо за игру!🌹🌹', '3;95')
+]
 
-
-# последняя сцена (титры)
+# титры
 def scene_6():
-    print_title('Титры')
-    time.sleep(1)
-    clear_screen()
-    text_animation('Пон. Сделала лера колибаба. Пон.    Спасибо за игру', 0.05)
-    #init_screen()
+    y = WINDOW_HEIGHT
+    x = round(TITLE_WIDTH/2) - 14
+
     while True:
-        for i in range(TITLE_WIDTH):
-            if drops[i] == 0 and random.random() < 0.02:
-                # начать новый поток в столбце
-                drops[i] = 1
-                streams_length[i] = random.randint(5, height // 2)
+        clear_screen()
 
-            if drops[i] > 0:
-                # Очистить символ, который вышел за пределы потока
-                if drops[i] > streams_length[i]:
-                    cursor_move(i + 1, drops[i] - streams_length[i])
-                    print(' ', end='')
+        for i, message in enumerate(messages, 1):
+            message_y = y + i*2
 
-                # Вывести символ текущей позиции
-                if 1 <= drops[i] <= height:
-                    cursor_move(i + 1, drops[i])
-                    print('\x1b[32m' + random.choice(chars), end='')
+            if message_y > 0 and message_y < WINDOW_HEIGHT:
+                cursor_to(x, message_y)
+                print(message, end='', flush=True)
+    
+        y-=1
+        time.sleep(0.4)
 
-                drops[i] += 1
-
-                # Если поток закончился — сбросить
-                if drops[i] - streams_length[i] > height:
-                    drops[i] = 0
-
-        time.sleep(0.02)
+        if y <= -24:
+            clear_screen()
+            break
 
 
 os.system('title Больница №52')
 
 scene_0()
+
+time.sleep(1)
