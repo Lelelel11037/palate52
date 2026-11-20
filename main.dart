@@ -22,6 +22,13 @@ class NotesApp extends StatelessWidget {
   }
 }
 
+class Note {
+  String text;
+  bool isImportant;
+
+  Note({required this.text, this.isImportant = false});
+}
+
 class NotesScreen extends StatefulWidget {
   const NotesScreen({super.key});
 
@@ -31,7 +38,7 @@ class NotesScreen extends StatefulWidget {
 
 class _NotesScreenState extends State<NotesScreen> {
   final TextEditingController _controller = TextEditingController();
-  final List<String> _notes = [];
+  final List<Note> _notes = [];
 
   int? _editingIndex;
 
@@ -41,9 +48,9 @@ class _NotesScreenState extends State<NotesScreen> {
 
     setState(() {
       if (_editingIndex == null) {
-        _notes.add(text);
+        _notes.add(Note(text: text));
       } else {
-        _notes[_editingIndex!] = text;
+        _notes[_editingIndex!].text = text;
         _editingIndex = null;
       }
       _controller.clear();
@@ -64,7 +71,7 @@ class _NotesScreenState extends State<NotesScreen> {
 
   void _editNote(int index) {
     setState(() {
-      _controller.text = _notes[index];
+      _controller.text = _notes[index].text;
       _editingIndex = index;
     });
   }
@@ -73,6 +80,53 @@ class _NotesScreenState extends State<NotesScreen> {
     setState(() {
       _editingIndex = null;
       _controller.clear();
+    });
+  }
+
+  void _viewNote(int index) {
+    final note = _notes[index];
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            if (note.isImportant) ...[
+              const Text('⭐️', style: TextStyle(fontSize: 20)),
+              const SizedBox(width: 8),
+            ],
+            const Expanded(
+              child: Text(
+                'Заметка',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Text(
+            note.text,
+            style: const TextStyle(fontSize: 16, height: 1.4),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Закрыть'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _toggleImportant(int index) {
+    setState(() {
+      _notes[index].isImportant = !_notes[index].isImportant;
+    });
+  }
+
+  void _resetImportant(int index) {
+    setState(() {
+      _notes[index].isImportant = false;
     });
   }
 
@@ -163,10 +217,7 @@ class _NotesScreenState extends State<NotesScreen> {
                   ? const Center(
                       child: Text(
                         'Пока нет заметок',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                     )
                   : ListView.separated(
@@ -174,47 +225,95 @@ class _NotesScreenState extends State<NotesScreen> {
                       separatorBuilder: (context, index) =>
                           const SizedBox(height: 12),
                       itemBuilder: (context, index) {
+                        final note = _notes[index];
                         final isEditing = _editingIndex == index;
-                        return Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: isEditing
-                                ? const Color(0xFFEDEBFF)
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: isEditing
-                                  ? const Color(0xFF5A55EE)
-                                  : const Color(0xFFE5E7EB),
-                            ),
+
+                        return Dismissible(
+                          key: ValueKey('note_$index'),
+                          direction: DismissDirection.horizontal,
+                          background: _buildSwipeBackground(
+                            alignment: Alignment.centerLeft,
+                            color: const Color(0xFF3AC47D),
+                            icon: Icons.star_border,
+                            label: 'Сброс',
                           ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  _notes[index],
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    color: Color(0xFF1D1D1D),
+                          secondaryBackground: _buildSwipeBackground(
+                            alignment: Alignment.centerRight,
+                            color: const Color(0xFFFF5A6B),
+                            icon: Icons.delete,
+                            label: 'Удалить',
+                          ),
+                          confirmDismiss: (direction) async {
+                            if (direction == DismissDirection.endToStart) {
+                              return true;
+                            } else {
+                              return note.isImportant;
+                            }
+                          },
+                          onDismissed: (direction) {
+                            if (direction == DismissDirection.endToStart) {
+                              _deleteNote(index);
+                            } else {
+                              _resetImportant(index);
+                            }
+                          },
+                          child: GestureDetector(
+                            onTap: () => _viewNote(index),
+                            onDoubleTap: () => _toggleImportant(index),
+                            onLongPress: () => _editNote(index),
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: isEditing
+                                    ? const Color(0xFFEDEBFF)
+                                    : note.isImportant
+                                        ? const Color(0xFFFFF6E0)
+                                        : Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: isEditing
+                                      ? const Color(0xFF5A55EE)
+                                      : note.isImportant
+                                          ? const Color(0xFFFFC83D)
+                                          : const Color(0xFFE5E7EB),
+                                ),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (note.isImportant) ...[
+                                    const Text(
+                                      '⭐️',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
+                                  Expanded(
+                                    child: Text(
+                                      note.text,
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        color: Color(0xFF1D1D1D),
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Color(0xFF5A55EE),
+                                    ),
+                                    onPressed: () => _editNote(index),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Color(0xFFFF5A6B),
+                                    ),
+                                    onPressed: () => _deleteNote(index),
+                                  ),
+                                ],
                               ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.edit,
-                                  color: Color(0xFF5A55EE),
-                                ),
-                                onPressed: () => _editNote(index),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Color(0xFFFF5A6B),
-                                ),
-                                onPressed: () => _deleteNote(index),
-                              ),
-                            ],
+                            ),
                           ),
                         );
                       },
@@ -222,6 +321,36 @@ class _NotesScreenState extends State<NotesScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSwipeBackground({
+    required Alignment alignment,
+    required Color color,
+    required IconData icon,
+    required String label,
+  }) {
+    return Container(
+      alignment: alignment,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }
